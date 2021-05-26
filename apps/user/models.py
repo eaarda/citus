@@ -20,13 +20,6 @@ class Company(TenantModel):
 
     class Meta:
         db_table="companies"
-    
-    def save(self, *args, **kwargs):
-        result = super(Company, self).save(*args,**kwargs)
-        user = TenantCompanyUsers.objects.create(company=self, user=self.createdBy)
-        user.save()
-
-        return result
 
 
 class TenantUser(AbstractUser, TenantModelMixin):

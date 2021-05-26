@@ -3,7 +3,6 @@ from django.contrib.auth.models import BaseUserManager
 from django.db import models
 
 
-
 class UserManager(BaseUserManager):
     """User Model manager for custom User model with no username field."""
 
@@ -37,21 +36,3 @@ class UserManager(BaseUserManager):
         user = self._create_user(email, password, **extra_fields)
         user.save()
         return user
-
-
-# class TenantUserManager(UserManager):
-#     def create_superuser(self, email, password, **extra_fields):
-#         """Create and save a SuperUser and Organization with the given email and password."""
-#         extra_fields.setdefault('is_staff', True)
-#         extra_fields.setdefault('is_superuser', True)
-
-#         if extra_fields.get('is_staff') is not True:
-#             raise ValueError('Superuser must have is_staff=True.')
-#         if extra_fields.get('is_superuser') is not True:
-#             raise ValueError('Superuser must have is_superuser=True.')
-#         user = self._create_user(email, password, **extra_fields)
-
-#         org_name = "{0}-organization".format(user.email)
-#         organization = create_organization(user, org_name,
-#                             org_user_defaults={}, use_tenant=True)
-#         return user

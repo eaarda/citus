@@ -1,11 +1,12 @@
 from django.contrib.auth import login, authenticate
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django_multitenant.utils import set_current_tenant
 from django.utils import timezone
 import datetime
 
-from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-from .models import Company, TenantUser
+from .models import Company, TenantUser, TenantCompanyUsers
+from .utils import create_company
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -23,12 +24,15 @@ class CompanySerializer(serializers.ModelSerializer):
         
         company = Company.objects.create(name=validated_data['name'], 
                                         createdBy=user)
-        company.save()
+        
+        set_current_tenant(company)
 
         user.name = validated_data['user_name']
         user.phone = validated_data['user_phone']
-        user.company_id = self.company
+        user.company = company
         user.save()
+
+        compus = TenantCompanyUsers.objects.create(company_id=company.id, user_id=user.id)
         
         return company
 
