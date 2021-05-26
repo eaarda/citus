@@ -12,9 +12,8 @@ class ItemNoteSerializer(serializers.ModelSerializer):
 
 
 class ItemSerializer(WritableNestedModelSerializer):
-    notes = ItemNoteSerializer(many=True, allow_null=True)
 
     class Meta:
         model = Item
-        fields = ('id', 'code', 'barcode', 'name', 'notes', 'sales_price')
+        fields = ('id', 'code', 'barcode', 'name', 'sales_price')
         read_only_fields = ['item_type']

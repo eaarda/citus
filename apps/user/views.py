@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from django.contrib.auth import login, authenticate, logout
 
 from .models import Company, TenantCompanyUsers
-from .serializers import CompanySerializer, LoginSerializer, TokenSerializer
+from .serializers import CompanySerializer, LoginSerializer, TokenSerializer, TenantCompanyUsersSerializer
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -20,6 +20,10 @@ class CompanyViewSet(viewsets.ModelViewSet):
         for i in users:
             company.extend(list(Company.objects.filter(id=i.company_id)))
         return company
+
+class TenantCompanyUsersViewSet(viewsets.ModelViewSet):
+    queryset = TenantCompanyUsers.objects.all()
+    serializer_class = TenantCompanyUsersSerializer
 
 
 class TokenViewSet(TokenObtainPairView):

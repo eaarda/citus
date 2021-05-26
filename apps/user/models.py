@@ -28,6 +28,7 @@ class TenantUser(AbstractUser, TenantModelMixin):
     company = models.ForeignKey(Company, related_name='users', on_delete=models.CASCADE, blank=True, null=True)
 
     id = models.UUIDField(primary_key = True, unique=True, default = uuid.uuid4, editable = False)
+    username = None
     email = models.EmailField(_('email address'), unique=True)
     name = models.CharField(_('name'), max_length=80, null=True)
     phone = models.CharField(max_length=15, null=True)
@@ -49,7 +50,7 @@ class TenantCompanyUsers(TenantModel):
     tenant_id = "company_id"
 
     company = models.ForeignKey(Company, related_name="company_users", on_delete=models.CASCADE)
-    user = TenantForeignKey(TenantUser, related_name="company_users", on_delete=models.CASCADE)
+    user = models.ForeignKey(TenantUser, related_name="company_users", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ["id","company"]

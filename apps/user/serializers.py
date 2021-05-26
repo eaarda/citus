@@ -8,6 +8,13 @@ import datetime
 from .models import Company, TenantUser, TenantCompanyUsers
 
 
+class TenantCompanyUsersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TenantCompanyUsers
+        fields = '__all__'
+        
+
 class CompanySerializer(serializers.ModelSerializer):
 
     user_name = serializers.CharField(write_only=True)
@@ -24,8 +31,6 @@ class CompanySerializer(serializers.ModelSerializer):
         company = Company.objects.create(name=validated_data['name'], 
                                         createdBy=user)
         
-        set_current_tenant(company)
-
         user.name = validated_data['user_name']
         user.phone = validated_data['user_phone']
         user.company = company
