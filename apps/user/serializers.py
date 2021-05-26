@@ -1,11 +1,12 @@
 from django.contrib.auth import login, authenticate
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from django_multitenant.utils import set_current_tenant
 from django.utils import timezone
 import datetime
 
 from .models import Company, TenantUser, TenantCompanyUsers
+from .tokens import RefreshToken
 
 
 class TenantCompanyUsersSerializer(serializers.ModelSerializer):
@@ -13,7 +14,7 @@ class TenantCompanyUsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = TenantCompanyUsers
         fields = '__all__'
-        
+
 
 class CompanySerializer(serializers.ModelSerializer):
 
@@ -41,16 +42,23 @@ class CompanySerializer(serializers.ModelSerializer):
         return company
 
 
-class TokenSerializer(TokenObtainPairSerializer):
+class TokenSerializer(TokenObtainSerializer):
+    company = serializers.CharField()
 
+    @classmethod
+    def get_token(cls, user, company):
+        return RefreshToken.for_user(user, company)
+    
     def validate(self, attrs):
-        data = super(TokenSerializer, self).validate(attrs)
-        data.update(
-            {"userData":
-                {'email': self.user.email,
-                }
-            }
-        )
+        data = super().validate(attrs)
+
+        refresh = self.get_token(self.user, attrs['company'])
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+        data['user'] = self.user.email
+        data['company'] = attrs['company']
+
         return data
 
 
