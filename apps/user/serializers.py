@@ -6,7 +6,6 @@ from django.utils import timezone
 import datetime
 
 from .models import Company, TenantUser, TenantCompanyUsers
-from .utils import create_company
 
 
 class CompanySerializer(serializers.ModelSerializer):

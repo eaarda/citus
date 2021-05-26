@@ -38,6 +38,7 @@ class TenantUser(AbstractUser, TenantModelMixin):
     objects = UserManager()
 
     class Meta:
+        db_table="users"
         unique_together = ["id","company"]
 
     def __str__(self):
