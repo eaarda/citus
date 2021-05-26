@@ -1,10 +1,11 @@
+from django.contrib.auth import login, authenticate
+from django.utils import timezone
+import datetime
+
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Company, TenantUser
-
-from django.utils import timezone
-import datetime
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -32,15 +33,33 @@ class CompanySerializer(serializers.ModelSerializer):
         return company
 
 
-class LoginSerializer(TokenObtainPairSerializer):
+class TokenSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
-        data = super(LoginSerializer, self).validate(attrs)
+        data = super(TokenSerializer, self).validate(attrs)
         data.update(
             {"userData":
                 {'email': self.user.email,
                 }
             }
         )
+        return data
 
+
+class LoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(style={'input_type': 'password'},max_length=128,write_only=True)
+
+    class Meta:
+        model = TenantUser
+        fields = ('email','password')
+    
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+        if email and password:
+            user = authenticate(username=email, password=password)
+            if user:
+                data['user'] = user
+            data['user'] = user
         return data
