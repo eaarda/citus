@@ -21,6 +21,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
             company.extend(list(Company.objects.filter(id=i.company_id)))
         return company
 
+
 class TenantCompanyUsersViewSet(viewsets.ModelViewSet):
     queryset = TenantCompanyUsers.objects.all()
     serializer_class = TenantCompanyUsersSerializer
@@ -45,23 +46,22 @@ class LoginViewSet(APIView):
                 login(request, user)
 
                 company_list = TenantCompanyUsers.objects.filter(user_id=self.request.user)
-                
-                if len(company_list)==1:
-                    data = {
+
+                data = {
                         "user":user.id,
                         "email":user.email,
                         "company_count":len(company_list),
-                        "company":company_list[0].company_id
                     }
+                
+                if len(company_list)==1:
+                    data.update({
+                        "company":company_list[0].company_id
+                    })
                     return Response(data,status.HTTP_200_OK)
 
                 else:
-                    data = {
-                        "user":user.id,
-                        "email":user.email,
-                        "company_count":len(company_list),
-                    }
                     return Response(data,status.HTTP_200_OK)
+                    
         return Response(status = status.HTTP_400_BAD_REQUEST)
 
 

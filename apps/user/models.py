@@ -50,7 +50,7 @@ class TenantCompanyUsers(TenantModel):
     tenant_id = "company_id"
 
     company = models.ForeignKey(Company, related_name="company_users", on_delete=models.CASCADE)
-    user = models.ForeignKey(TenantUser, related_name="company_users", on_delete=models.CASCADE)
+    user = models.ForeignKey(TenantUser, related_name="company_users", on_delete=models.CASCADE) #TenantForeignKey?
 
     class Meta:
         unique_together = ["id","company"]
