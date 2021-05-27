@@ -8,7 +8,7 @@ class MultitenantMiddleware:
     def __call__(self, request):
         if request.user and not request.user.is_anonymous:
             print("token.company")
-            print(request.GET)
-            print(request.user)
+            # print(request.GET)
+            # print(request.user)
             #set_current_tenant(request.user.company)
         return self.get_response(request)

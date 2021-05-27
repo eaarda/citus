@@ -51,14 +51,17 @@ class LoginViewSet(APIView):
                         "user":user.id,
                         "email":user.email,
                         "company_count":len(company_list),
+                        "company_list":[]
                     }
                 
-                if len(company_list)==1:
-                    data.update({
-                        "company":company_list[0].company_id
-                    })
+                if len(company_list)>0:
+                    for i in company_list:
+                        company = Company.objects.get(id=i.company_id)
+                        data['company_list'].append({
+                                "company_id":i.company_id,
+                                "company_name":company.name
+                        })
                     return Response(data,status.HTTP_200_OK)
-
                 else:
                     return Response(data,status.HTTP_200_OK)
                     
