@@ -10,12 +10,17 @@ from .models import Company, TenantCompanyUsers
 from .serializers import CompanySerializer, LoginSerializer, TokenSerializer, TenantCompanyUsersSerializer
 
 
+from django_multitenant.utils import (get_current_tenant, unset_current_tenant,
+                                      get_tenant_column, set_current_tenant)
+
+
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
     def get_queryset(self):
-        users = TenantCompanyUsers.objects.filter(user_id=self.request.user)
+        tenant = get_current_tenant()
+        users = TenantCompanyUsers.objects.filter(company_id=tenant)
         company=[]
         for i in users:
             company.extend(list(Company.objects.filter(id=i.company_id)))
