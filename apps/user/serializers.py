@@ -1,7 +1,9 @@
 from django.contrib.auth import login, authenticate
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
-from django_multitenant.utils import set_current_tenant
+from django_multitenant.utils import set_current_tenant, unset_current_tenant
 from django.utils import timezone
 import datetime
 
@@ -29,16 +31,18 @@ class CompanySerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         user = TenantUser.objects.get(id=user.id)
         
+        unset_current_tenant()
         company = Company.objects.create(name=validated_data['name'], 
                                         createdBy=user)
+        
         
         user.name = validated_data['user_name']
         user.phone = validated_data['user_phone']
         user.company = company
         user.save()
 
-        compus = TenantCompanyUsers.objects.create(company_id=company.id, user_id=user.id)
-        
+        TenantCompanyUsers.objects.create(company_id=company.id, user_id=user.id)
+        set_current_tenant(company)
         return company
 
 
@@ -75,7 +79,26 @@ class LoginSerializer(serializers.ModelSerializer):
         password = data.get('password')
         if email and password:
             user = authenticate(username=email, password=password)
-            if user:
-                data['user'] = user
             data['user'] = user
         return data
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True,validators=[UniqueValidator(queryset=TenantUser.objects.all())])
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=True, validators=[validate_password])
+    password1 = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=True)
+
+    class Meta:
+        model = TenantUser
+        fields = ('email','password','password1')
+    
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password1']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return attrs
+
+    def create(self,validated_data):
+        user = TenantUser.objects.create(email=validated_data['email'])
+        user.set_password(validated_data['password'])
+        user.save()
+        return user

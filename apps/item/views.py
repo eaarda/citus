@@ -21,7 +21,7 @@ class ProductViewSet(BaseModelViewSet):
     serializer_class = ItemSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(item_type=ItemType.PRODUCT)
+        return self.queryset.filter(item_type=ItemType.PRODUCT,company_id=get_current_tenant())
 
     def perform_create(self, serializer):
         obj = serializer.save(item_type=ItemType.PRODUCT)
@@ -33,7 +33,7 @@ class ServiceViewSet(BaseModelViewSet):
     serializer_class = ItemSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(item_type=ItemType.SERVICE)
+        return self.queryset.filter(item_type=ItemType.SERVICE, company_id=get_current_tenant())
 
     def perform_create(self, serializer):
         obj = serializer.save(item_type=ItemType.SERVICE)

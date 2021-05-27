@@ -14,6 +14,7 @@ class MultitenantMiddleware(MiddlewareMixin):
     def __call__(self, request):
 
         try:
+            
             token = request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
             data = {'token': token}
             valid_data = TokenBackend(algorithm='HS256').decode(token,verify=False)
@@ -21,7 +22,6 @@ class MultitenantMiddleware(MiddlewareMixin):
             company = Company.objects.get(id=company_id)
             unset_current_tenant()
             set_current_tenant(company)
-            print("current tenant id:",get_current_tenant())
         
         except:
             pass

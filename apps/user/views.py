@@ -1,17 +1,14 @@
-from rest_framework import viewsets
-from rest_framework import generics, status, serializers
+from rest_framework import viewsets, generics, status, serializers
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView 
+from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from django.contrib.auth import login, authenticate, logout
+from django_multitenant.utils import get_current_tenant
 
-from .models import Company, TenantCompanyUsers
-from .serializers import CompanySerializer, LoginSerializer, TokenSerializer, TenantCompanyUsersSerializer
-
-
-from django_multitenant.utils import (get_current_tenant, unset_current_tenant,
-                                      get_tenant_column, set_current_tenant)
+from .models import Company, TenantCompanyUsers, TenantUser
+from .serializers import CompanySerializer, LoginSerializer, TokenSerializer, TenantCompanyUsersSerializer, RegisterSerializer
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -19,8 +16,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
 
     def get_queryset(self):
-        tenant = get_current_tenant()
-        users = TenantCompanyUsers.objects.filter(company_id=tenant)
+        users = TenantCompanyUsers.objects.filter(company_id=get_current_tenant()) # ?
         company=[]
         for i in users:
             company.extend(list(Company.objects.filter(id=i.company_id)))
@@ -73,8 +69,14 @@ class LoginViewSet(APIView):
         return Response(status = status.HTTP_400_BAD_REQUEST)
 
 
+class RegisterViewSet(CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
+
+
 class LogoutViewSet(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self,request, format=None):
         logout(request)
         return Response(status=status.HTTP_200_OK)
