@@ -5,22 +5,28 @@ from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from django.contrib.auth import login, authenticate, logout
-from django_multitenant.utils import get_current_tenant
+from django_multitenant.utils import get_current_tenant, unset_current_tenant
 
 from .models import Company, TenantCompanyUsers, TenantUser
 from .serializers import CompanySerializer, LoginSerializer, TokenSerializer, TenantCompanyUsersSerializer, RegisterSerializer
 
 
-class CompanyViewSet(viewsets.ModelViewSet):
+class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
     def get_queryset(self):
-        users = TenantCompanyUsers.objects.filter(company_id=get_current_tenant()) # ?
+        unset_current_tenant()
+        user_companies = TenantCompanyUsers.objects.filter(user_id=self.request.user)
         company=[]
-        for i in users:
+        for i in user_companies:
             company.extend(list(Company.objects.filter(id=i.company_id)))
         return company
+
+
+class CompanyCreateViewSet(CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = CompanySerializer
 
 
 class TenantCompanyUsersViewSet(viewsets.ModelViewSet):

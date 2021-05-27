@@ -14,6 +14,8 @@ from .managers import UserManager
 
 class Company(TenantModel):
     tenant_id = "id"
+    # TODO
+    # id -> unique
     name = models.CharField(max_length=100)
     createdBy = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='companies')
     endDate = models.DateTimeField(default=now)
