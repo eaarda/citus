@@ -40,20 +40,17 @@ class CompanySerializer(serializers.ModelSerializer):
         except:
             raise serializers.ValidationError({"createdBy is not a valid UUID."})
             
-        if user:
+        if user.company:
+            raise serializers.ValidationError({"You can not create a new company."})
 
-            if user.company:
-                raise serializers.ValidationError({"You can not create a new company."})
-
-            else:
-                company = Company.objects.create(name=validated_data['name'], createdBy=user)
-                user.name = validated_data['user_name']
-                user.phone = validated_data['user_phone']
-                user.company = company
-                user.save()
-                TenantCompanyUsers.objects.create(company=company, user=user)
-                set_current_tenant(company)
-                return company
+        else:
+            company = Company.objects.create(name=validated_data['name'], createdBy=user)
+            user.name = validated_data['user_name']
+            user.phone = validated_data['user_phone']
+            user.company = company
+            user.save()
+            TenantCompanyUsers.objects.create(company=company, user=user)
+            set_current_tenant(company)
             
         return company
 
@@ -103,7 +100,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TenantUser
-        fields = ('email','password','password1')
+        fields = ('id','email','password','password1')
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password1']:

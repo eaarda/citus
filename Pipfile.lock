@@ -71,18 +71,18 @@
         },
         "djangorestframework-simplejwt": {
             "hashes": [
-                "sha256:14473248c408e29290bde3b76df32ebbaeaaa096d8b2c3a77778e9e8f7d73d2c",
-                "sha256:9872a0fca6c7ae74a162254c4e5d9c998f8e8800b9bf2ad507087e98ef283a39"
+                "sha256:3242f35aaab0db6e2a5636a0ccfc49ff06943809ec063d1356253d1bf28b80a3",
+                "sha256:c0e9b617da337becb55e67935eb992fad84f861418e7ab5fb3e77a3fd18d4137"
             ],
             "index": "pypi",
-            "version": "==4.7.0"
+            "version": "==4.7.1"
         },
         "drf-writable-nested": {
             "hashes": [
-                "sha256:bb413286bd5ebf943460ba7c2dc177d572d6447d5287228cc763062c5a12e3d6"
+                "sha256:b96d30aca953f4dba313bb5697da4022470dc63fb2dbe68c93d38d389ec63ac2"
             ],
             "index": "pypi",
-            "version": "==0.6.2"
+            "version": "==0.6.3"
         },
         "enum-compat": {
             "hashes": [
