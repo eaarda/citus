@@ -22,10 +22,8 @@ class TenantCompanyUsersSerializer(serializers.ModelSerializer):
 
 class CompanySerializer(serializers.ModelSerializer):
 
-    name = serializers.CharField()
     user_name = serializers.CharField(write_only=True)
     user_phone = serializers.CharField(write_only=True)
-    createdBy = serializers.CharField()
 
     class Meta:
         model = Company
@@ -35,7 +33,7 @@ class CompanySerializer(serializers.ModelSerializer):
     def create(self,validated_data):
 
         try:
-            user = TenantUser.objects.get(id=validated_data['createdBy'])
+            user = TenantUser.objects.get(id=validated_data['createdBy'].id)
         
         except:
             raise serializers.ValidationError({"createdBy is not a valid UUID."})
