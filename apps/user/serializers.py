@@ -1,12 +1,8 @@
-from django.contrib.auth import login, authenticate
-from rest_framework import serializers, status
-from rest_framework.response import Response
+from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
-from django_multitenant.utils import set_current_tenant, unset_current_tenant
-from django.utils import timezone
-import datetime
+from django_multitenant.utils import set_current_tenant
 from django.core.exceptions import ValidationError
 
 from .models import Company, TenantUser, TenantCompanyUsers

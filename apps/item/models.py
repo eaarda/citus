@@ -7,7 +7,6 @@ from django_multitenant.models import TenantModel
 from apps.user.models import Company
 
 
-
 class ItemType(models.TextChoices):
     PRODUCT = 'product'
     SERVICE = 'service'
