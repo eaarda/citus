@@ -22,10 +22,10 @@ class TenantCompanyUsersSerializer(serializers.ModelSerializer):
 
 class CompanySerializer(serializers.ModelSerializer):
 
-    name = serializers.CharField(write_only=True)
+    name = serializers.CharField()
     user_name = serializers.CharField(write_only=True)
     user_phone = serializers.CharField(write_only=True)
-    createdBy = serializers.CharField(write_only=True)
+    createdBy = serializers.CharField()
 
     class Meta:
         model = Company
@@ -33,42 +33,29 @@ class CompanySerializer(serializers.ModelSerializer):
     
     
     def create(self,validated_data):
-        
-        # if TenantUser.objects.get(id=validated_data['createdBy']):
-        #     user = TenantUser.objects.get(id=validated_data['createdBy'])
-        #     if user.company_id:
-        #         raise serializers.ValidationError({"You can not create a new company."})
-        #     else:
-        #         company = Company.objects.create(name=validated_data['name'], createdBy_id=user.id)
-        #         user.name = validated_data['user_name']
-        #         user.phone = validated_data['user_phone']
-        #         user.company = company
-        #         user.save()
-        #         TenantCompanyUsers.objects.create(company_id=company.id, user_id=user.id)
-        #         set_current_tenant(company)
-        # else:
-        #     raise serializers.ValidationError({"createdBy is not a valid UUID."})
-        #     ValidationError("You can not create a new company.")
+
         try:
-            user = TenantUser.objects.filter(id=validated_data['createdBy'])
-            if user[0].company_id:
-                #raise serializers.ValidationError({"You can not create a new company."})
-                ValidationError("You can not create a new company.")
-            else:
-                company = Company.objects.create(name=validated_data['name'], createdBy_id=user[0].id)
-                print(validated_data['user_name'])
-                user[0].name = validated_data['user_name']
-                user[0].phone = validated_data['user_phone']
-                user[0].company = company
-                user[0].save()
-                #TenantCompanyUsers.objects.create(company_id=company.id, user_id=user[0].id)
-                #set_current_tenant(company)
-                return company
-            
+            user = TenantUser.objects.get(id=validated_data['createdBy'])
+        
         except:
             raise serializers.ValidationError({"createdBy is not a valid UUID."})
-        
-        return user
+            
+        if user:
+
+            if user.company:
+                raise serializers.ValidationError({"You can not create a new company."})
+
+            else:
+                company = Company.objects.create(name=validated_data['name'], createdBy=user)
+                user.name = validated_data['user_name']
+                user.phone = validated_data['user_phone']
+                user.company = company
+                user.save()
+                TenantCompanyUsers.objects.create(company=company, user=user)
+                set_current_tenant(company)
+                return company
+            
+        return company
 
 
 
