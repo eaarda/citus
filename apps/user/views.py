@@ -2,6 +2,7 @@ from rest_framework import viewsets, generics, status, serializers
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView 
 from rest_framework.generics import CreateAPIView
+from rest_framework.decorators import action
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from django.contrib.auth import login, authenticate, logout
@@ -40,39 +41,43 @@ class TokenViewSet(TokenObtainPairView):
 
 
 class LoginViewSet(APIView):
-    serializer_class = LoginSerializer
     permission_classes = [AllowAny]
 
     def post(self,request):
         serializer = LoginSerializer(data=request.data)
 
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
+        if not serializer.is_valid():
+            return Response({"errors": serializer.errors},status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.data['email']
+        password = serializer.data['password']
 
-            if user:
-                login(request, user)
+        if not TenantUser.objects.filter(email=email).exists():
+            return Response({"message":"User does not exists."},status.HTTP_400_BAD_REQUEST)
 
-                company_list = TenantCompanyUsers.objects.filter(user_id=self.request.user)
+        user = authenticate(email=email,password=password)
 
-                data = {
-                        "user":user.id,
-                        "email":user.email,
-                        "company_count":len(company_list),
-                        "company_list":[]
-                    }
-                
-                if len(company_list)>0:
-                    for i in company_list:
-                        company = Company.objects.get(id=i.company_id)
-                        data['company_list'].append({
+        if not user or user.is_anonymous:
+            return Response({"message":"Email and password does not match."},status.HTTP_400_BAD_REQUEST)
+        
+        login(request,user)
+        company_list = TenantCompanyUsers.objects.filter(user_id=user)
+
+        data = {
+            "user":user.id,
+            "email":user.email,
+            "company_count":len(company_list),
+            "company_list":[]
+        }
+        if len(company_list)>0:
+            for i in company_list:
+                company = Company.objects.get(id=i.company_id)
+                data['company_list'].append({
                                 "company_id":i.company_id,
                                 "company_name":company.name
-                        })
-                    return Response(data,status.HTTP_200_OK)
-                else:
-                    return Response(data,status.HTTP_200_OK)
-                    
-        return Response(status = status.HTTP_400_BAD_REQUEST)
+                })
+                
+        return Response(data,status.HTTP_200_OK)
 
 
 class RegisterViewSet(CreateAPIView):

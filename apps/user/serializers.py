@@ -29,7 +29,7 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = ('id','name','user_name','user_phone','createdBy','endDate')
     
-    
+
     def create(self,validated_data):
 
         try:
@@ -51,7 +51,6 @@ class CompanySerializer(serializers.ModelSerializer):
             set_current_tenant(company)
             
         return company
-
 
 
 class TokenSerializer(TokenObtainSerializer):
@@ -76,19 +75,11 @@ class TokenSerializer(TokenObtainSerializer):
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
-    password = serializers.CharField(style={'input_type': 'password'},max_length=128,write_only=True)
+    password = serializers.CharField(style={'input_type': 'password'},max_length=128)
 
     class Meta:
         model = TenantUser
         fields = ('email','password')
-    
-    def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
-        if email and password:
-            user = authenticate(username=email, password=password)
-            data['user'] = user
-        return data
 
 
 class RegisterSerializer(serializers.ModelSerializer):
