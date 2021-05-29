@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 from django_multitenant.fields import TenantForeignKey
+from django_multitenant.fields import TenantOneToOneField
 from django_multitenant.models import TenantModel
 
 from apps.user.models import Company

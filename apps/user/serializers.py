@@ -54,7 +54,17 @@ class TokenSerializer(TokenObtainSerializer):
 
     @classmethod
     def get_token(cls, user, company):
-        return RefreshToken.for_user(user, company)
+        try:
+            company = Company.objects.get(id=company)
+        except:
+            raise serializers.ValidationError({"CompanyId is not a valid UUID."})
+        
+        try:
+            TenantCompanyUsers.objects.get(company_id=company,user_id=user)
+        except:
+            raise serializers.ValidationError({"Access denied."})
+            
+        return RefreshToken.for_user(user, str(company.id))
     
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -79,7 +89,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True,validators=[UniqueValidator(queryset=TenantUser.objects.all())])
+    email = serializers.EmailField(required=True,validators=[UniqueValidator(queryset=TenantUser.objects.all(), lookup='iexact' )])
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=True, validators=[validate_password])
     password1 = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=True)
 
